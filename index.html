@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bizim Hikayemiz ❤️</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:black;color:white;font-family:Arial;overflow:hidden}
+
+/* 🎮 Oyun */
+#game{position:fixed;inset:0;z-index:300}
+#heart{position:absolute;font-size:80px;cursor:pointer}
+
+/* 🎵 */
+#audioBtn{
+ position:fixed;bottom:20px;left:20px;z-index:20;
+ background:#ff5fa2;color:white;border:none;
+ padding:10px 18px;border-radius:20px
+}
+
+/* 🖼️ Foto */
+#photos{position:fixed;right:0;top:0;width:30%;height:100%}
+#photos img{
+ position:absolute;width:100%;height:100%;
+ object-fit:cover;opacity:0;transition:opacity 3s
+}
+#photos img.active{opacity:1}
+
+/* 🎬 Video */
+#videos{
+ position:absolute;left:0;top:0;width:70%;height:100%;
+ display:grid;
+ grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+ grid-auto-rows:140px;
+ gap:12px;padding:12px
+}
+#videos video{
+ width:100%;height:100%;object-fit:cover;
+ border-radius:12px;
+ opacity:0;transform:scale(0.7);
+ animation:appear 1.5s forwards
+}
+@keyframes appear{to{opacity:1;transform:scale(1)}}
+
+/* 💥 Kalp patlaması */
+#explosion{position:fixed;inset:0;display:none;z-index:400}
+.small-heart{
+ position:absolute;font-size:20px;cursor:pointer;
+ animation:floatUp 6s linear forwards
+}
+@keyframes floatUp{
+ from{opacity:1}to{opacity:0;transform:translateY(-200px)}
+}
+
+/* 🖤 Final */
+#final{
+ position:fixed;inset:0;background:black;
+ display:none;justify-content:center;
+ align-items:center;text-align:center;z-index:500
+}
+#final h1{
+ color:#ff5fa2;font-size:40px;
+ animation:heartbeat 1.5s infinite
+}
+#final p{font-size:22px;margin-top:15px}
+@keyframes heartbeat{
+ 0%{transform:scale(1)}
+ 50%{transform:scale(1.2)}
+ 100%{transform:scale(1)}
+}
+
+/* 📱 Mobil */
+@media(max-width:768px){
+ #photos{display:none}
+ #videos{width:100%}
+ #final h1{font-size:28px}
+}
+</style>
+</head>
+
+<body>
+
+<div id="game"><div id="heart">❤️</div></div>
+
+<button id="audioBtn" onclick="startMusic()">Müziği Başlat 🎵</button>
+<audio id="music" src="aldanirim.mp3"></audio>
+<audio id="escapeSound" src="escape.mp3"></audio>
+
+<div id="videos"></div>
+<div id="photos"></div>
+<div id="explosion"></div>
+
+<div id="final">
+ <div>
+  <h1 id="finalText"></h1>
+  <p>NİCE SENELERİMİZE HAYATIM</p>
+ </div>
+</div>
+
+<script>
+/* 🎬 Cloudinary Video Linkleri */
+const videoLinks=[
+"https://res.cloudinary.com/dry9l59xw/video/upload/v1768691681/video2_x2vxqy.mp4",
+"https://res.cloudinary.com/dry9l59xw/video/upload/v1768691678/video4_ezyncb.mp4",
+"https://res.cloudinary.com/dry9l59xw/video/upload/v1768691678/video5_jru6j6.mp4",
+"https://res.cloudinary.com/dry9l59xw/video/upload/v1768691678/video6_mdmk7m.mp4",
+"https://res.cloudinary.com/dry9l59xw/video/upload/v1768691681/video7_hyrhj8.mp4",
+"https://res.cloudinary.com/dry9l59xw/video/upload/v1768691681/video8_znngxp.mp4",
+"https://res.cloudinary.com/dry9l59xw/video/upload/v1768691679/video9_ft3zrl.mp4",
+"https://res.cloudinary.com/dry9l59xw/video/upload/v1768691683/video10_z0mayu.mp4",
+"https://res.cloudinary.com/dry9l59xw/video/upload/v1768691684/video11_hhurqi.mp4",
+"https://res.cloudinary.com/dry9l59xw/video/upload/v1768691678/video12_ddbafi.mp4",
+"https://res.cloudinary.com/dry9l59xw/video/upload/v1768691677/video14_ht5vi0.mp4"
+];
+
+const heart=document.getElementById("heart");
+const game=document.getElementById("game");
+const escapeSound=document.getElementById("escapeSound");
+const music=document.getElementById("music");
+const videoBox=document.getElementById("videos");
+const photos=document.getElementById("photos");
+const explosion=document.getElementById("explosion");
+
+let x=100,y=100,vx=6,vy=5,escapes=0;
+
+/* ❤️ Sekerek kaçan kalp */
+function moveHeart(){
+ x+=vx;y+=vy;
+ if(x<0||x>innerWidth-80)vx*=-1;
+ if(y<0||y>innerHeight-80)vy*=-1;
+ heart.style.transform=`translate(${x}px,${y}px)`;
+ requestAnimationFrame(moveHeart);
+}
+moveHeart();
+
+heart.onclick=()=>{
+ escapes++;
+ escapeSound.currentTime=0;
+ escapeSound.play();
+ vx*=1.2;vy*=1.2;
+ if(escapes>=7){
+  game.style.display="none";
+  startSite();
+ }
+};
+
+function startMusic(){music.play()}
+
+/* 📸 Foto slayt */
+let p=0;
+for(let i=1;i<=28;i++){
+ let img=document.createElement("img");
+ img.src=`foto${i}.jpg`;
+ if(i===1)img.classList.add("active");
+ photos.appendChild(img);
+}
+setInterval(()=>{
+ let imgs=document.querySelectorAll("#photos img");
+ imgs.forEach(i=>i.classList.remove("active"));
+ imgs[p%imgs.length].classList.add("active");
+ p++;
+},6000);
+
+/* 🎬 Videolar */
+let v=0;
+function startVideos(){
+ function add(){
+  if(v>=videoLinks.length)return;
+  let vid=document.createElement("video");
+  vid.src=videoLinks[v];
+  vid.autoplay=true;
+  vid.loop=true;
+  vid.muted=true;
+  vid.playsInline=true;
+  videoBox.appendChild(vid);
+  v++;
+  setTimeout(add,4000);
+ }
+ add();
+}
+
+function startSite(){
+ startMusic();
+ startVideos();
+}
+
+/* 💥 1000 kalp patlaması */
+setTimeout(()=>{
+ explosion.style.display="block";
+ for(let i=0;i<1000;i++){
+  let h=document.createElement("div");
+  h.className="small-heart";
+  h.innerHTML="❤️";
+  h.style.left=Math.random()*100+"vw";
+  h.style.top=Math.random()*100+"vh";
+  h.onclick=showFinal;
+  explosion.appendChild(h);
+ }
+},110000);
+
+/* 🖤 Final */
+function showFinal(){
+ explosion.style.display="none";
+ final.style.display="flex";
+ let text="SENİ SEVİYORUM";
+ let i=0;
+ let t=setInterval(()=>{
+  finalText.innerHTML+=text[i];
+  i++;
+  if(i===text.length)clearInterval(t);
+ },150);
+ let fade=setInterval(()=>{
+  if(music.volume>0)music.volume-=0.02;
+ },200);
+}
+</script>
+
+</body>
+</html>
